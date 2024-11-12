@@ -8,8 +8,49 @@
 
 #include "../common_fdt.h"
 
+static void fdt_fixup_cores_wdt_nodes_am62a(void *blob, int core_nr)
+{
+	char node_path[32];
+
+	if (core_nr < 1)
+		return;
+
+	for (; core_nr < 4; core_nr++) {
+		snprintf(node_path, sizeof(node_path), "/cpus/cpu@%d", core_nr);
+		fdt_del_node_path(blob, node_path);
+		snprintf(node_path, sizeof(node_path), "/cpus/cpu-map/cluster0/core%d", core_nr);
+		fdt_del_node_path(blob, node_path);
+		snprintf(node_path, sizeof(node_path), "/bus@f0000/watchdog@e0%d0000", core_nr);
+		fdt_del_node_path(blob, node_path);
+	}
+}
+
+static void fdt_fixup_dss_nodes_am62a(void *blob, bool has_dss)
+{
+	if (!has_dss) {
+		fdt_del_node_path(blob, "/bus@f0000/dss@30200000");
+		fdt_del_node_path(blob, "/bus@f0000/pinctrl@f4000/main-dss0-default-pins");
+	}
+}
+
+static void fdt_fixup_video_codec_nodes_am62a(void *blob, bool has_video_codec)
+{
+	if (!has_video_codec)
+		fdt_del_node_path(blob, "/bus@f0000/video-codec@30210000");
+}
+
+static void fdt_fixup_canfd_nodes_am62a(void *blob, bool has_canfd)
+{
+	if (!has_canfd)
+		fdt_del_node_path(blob, "/bus@f0000/can@20701000");
+}
+
 int ft_system_setup(void *blob, struct bd_info *bd)
 {
+	fdt_fixup_cores_wdt_nodes_am62a(blob, k3_get_core_nr());
+	fdt_fixup_dss_nodes_am62a(blob, k3_has_dss());
+	fdt_fixup_video_codec_nodes_am62a(blob, k3_has_video_codec());
+	fdt_fixup_canfd_nodes_am62a(blob, k3_has_canfd());
 	fdt_fixup_reserved(blob, "tfa", CONFIG_K3_ATF_LOAD_ADDR, 0x80000);
 	fdt_fixup_reserved(blob, "optee", CONFIG_K3_OPTEE_LOAD_ADDR, 0x1800000);
 
