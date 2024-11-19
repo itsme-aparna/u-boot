@@ -28,6 +28,8 @@
 #define JTAG_DEV_VIDEO_CODEC_SHIFT			14
 #define JTAG_DEV_DSS_MASK			GENMASK(16, 13)
 #define JTAG_DEV_DSS_SHIFT			13
+#define JTAG_DEV_SPEED_MASK			GENMASK(10, 6)
+#define JTAG_DEV_SPEED_SHIFT			6
 #define JTAG_DEV_TEMP_MASK			GENMASK(5, 3)
 #define JTAG_DEV_TEMP_SHIFT			3
 
@@ -142,6 +144,27 @@ static inline int k3_get_max_temp(void)
 		return JTAG_DEV_TEMP_AUTOMOTIVE_VALUE;
 	else
 		return JTAG_DEV_TEMP_EXTENDED_VALUE;
+}
+
+static inline char k3_get_speed_grade(void)
+{
+	u32 dev_id = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
+	u32 speed_grade = (dev_id & JTAG_DEV_SPEED_MASK) >>
+			   JTAG_DEV_SPEED_SHIFT;
+
+	return 'A' - 1 + speed_grade;
+}
+
+static inline int k3_get_a53_max_frequency(void)
+{
+	if (k3_get_speed_grade() <= 'N')
+		return 800000000;
+
+	else if (k3_get_speed_grade() <= 'R')
+		return 1000000000;
+
+	else
+		return 1250000000;
 }
 
 #if defined(CONFIG_SYS_K3_SPL_ATF) && !defined(__ASSEMBLY__)

@@ -81,6 +81,19 @@ static void fdt_fixup_thermal_zone_nodes_am62a(void *blob, int maxc)
 	}
 }
 
+static void fdt_fixup_cpu_freq_nodes_am62a(void *blob, int max_freq)
+{
+	if (max_freq >= 1250000000)
+		return;
+	if (max_freq <= 1000000000) {
+		fdt_del_node_path(blob, "/opp-table/opp-1250000000");
+		fdt_del_node_path(blob, "/opp-table/opp-1400000000");
+	}
+	if (max_freq <= 800000000) {
+		fdt_del_node_path(blob, "/opp-table/opp-1000000000");
+	}
+}
+
 int ft_system_setup(void *blob, struct bd_info *bd)
 {
 	fdt_fixup_cores_wdt_nodes_am62a(blob, k3_get_core_nr());
@@ -88,6 +101,7 @@ int ft_system_setup(void *blob, struct bd_info *bd)
 	fdt_fixup_video_codec_nodes_am62a(blob, k3_has_video_codec());
 	fdt_fixup_canfd_nodes_am62a(blob, k3_has_canfd());
 	fdt_fixup_thermal_zone_nodes_am62a(blob, k3_get_max_temp());
+	fdt_fixup_cpu_freq_nodes_am62a(blob, k3_get_a53_max_frequency());
 	fdt_fixup_reserved(blob, "tfa", CONFIG_K3_ATF_LOAD_ADDR, 0x80000);
 	fdt_fixup_reserved(blob, "optee", CONFIG_K3_OPTEE_LOAD_ADDR, 0x1800000);
 
