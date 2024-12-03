@@ -21,24 +21,16 @@
 #define WKUP_CTRL_MMR0_BASE			0x43000000
 
 #define CTRLMMR_WKUP_JTAG_DEVICE_ID		(WKUP_CTRL_MMR0_BASE + 0x18)
-#define JTAG_DEV_ID_MASK			GENMASK(31, 18)
-#define JTAG_DEV_ID_SHIFT			18
 #define JTAG_DEV_CORE_NR_MASK			GENMASK(21, 19)
 #define JTAG_DEV_CORE_NR_SHIFT			19
 #define JTAG_DEV_GPU_MASK			BIT(18)
 #define JTAG_DEV_GPU_SHIFT			18
 #define JTAG_DEV_FEATURES_MASK			GENMASK(17, 13)
 #define JTAG_DEV_FEATURES_SHIFT			13
-#define JTAG_DEV_SECURITY_MASK			BIT(12)
-#define JTAG_DEV_SECURITY_SHIFT			12
-#define JTAG_DEV_SAFETY_MASK			BIT(11)
-#define JTAG_DEV_SAFETY_SHIFT			11
 #define JTAG_DEV_SPEED_MASK			GENMASK(10, 6)
 #define JTAG_DEV_SPEED_SHIFT			6
 #define JTAG_DEV_TEMP_MASK			GENMASK(5, 3)
 #define JTAG_DEV_TEMP_SHIFT			3
-#define JTAG_DEV_PKG_MASK			GENMASK(2, 0)
-#define JTAG_DEV_PKG_SHIFT			0
 
 #define JTAG_DEV_FEATURE_NO_PRU			0x4
 
@@ -89,15 +81,15 @@
 
 static inline int k3_get_core_nr(void)
 {
-	u32 full_devid = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
+	u32 dev_id = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
 
-	return (full_devid & JTAG_DEV_CORE_NR_MASK) >> JTAG_DEV_CORE_NR_SHIFT;
+	return (dev_id & JTAG_DEV_CORE_NR_MASK) >> JTAG_DEV_CORE_NR_SHIFT;
 }
 
 static inline char k3_get_speed_grade(void)
 {
-	u32 full_devid = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
-	u32 speed_grade = (full_devid & JTAG_DEV_SPEED_MASK) >>
+	u32 dev_id = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
+	u32 speed_grade = (dev_id & JTAG_DEV_SPEED_MASK) >>
 			   JTAG_DEV_SPEED_SHIFT;
 
 	return 'A' - 1 + speed_grade;
@@ -105,9 +97,9 @@ static inline char k3_get_speed_grade(void)
 
 static inline int k3_get_temp_grade(void)
 {
-	u32 full_devid = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
+	u32 dev_id = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
 
-	return (full_devid & JTAG_DEV_TEMP_MASK) >> JTAG_DEV_TEMP_SHIFT;
+	return (dev_id & JTAG_DEV_TEMP_MASK) >> JTAG_DEV_TEMP_SHIFT;
 }
 
 static inline int k3_get_max_temp(void)
@@ -140,8 +132,8 @@ static inline int k3_get_a53_max_frequency(void)
 
 static inline int k3_has_pru(void)
 {
-	u32 full_devid = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
-	u32 feature_mask = (full_devid & JTAG_DEV_FEATURES_MASK) >>
+	u32 dev_id = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
+	u32 feature_mask = (dev_id & JTAG_DEV_FEATURES_MASK) >>
 			   JTAG_DEV_FEATURES_SHIFT;
 
 	return !(feature_mask & JTAG_DEV_FEATURE_NO_PRU);
@@ -149,9 +141,9 @@ static inline int k3_has_pru(void)
 
 static inline int k3_has_gpu(void)
 {
-	u32 full_devid = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
+	u32 dev_id = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
 
-	return (full_devid & JTAG_DEV_GPU_MASK) >> JTAG_DEV_GPU_SHIFT;
+	return (dev_id & JTAG_DEV_GPU_MASK) >> JTAG_DEV_GPU_SHIFT;
 }
 
 #if defined(CONFIG_SYS_K3_SPL_ATF) && !defined(__ASSEMBLY__)

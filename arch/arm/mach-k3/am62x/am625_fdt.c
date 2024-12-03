@@ -9,7 +9,7 @@
 
 #include "../common_fdt.h"
 
-static void fdt_fixup_cores_nodes_am625(void *blob, int core_nr)
+static void fdt_fixup_cores_wdt_nodes_am625(void *blob, int core_nr)
 {
 	char node_path[32];
 
@@ -26,7 +26,7 @@ static void fdt_fixup_cores_nodes_am625(void *blob, int core_nr)
 	}
 }
 
-static void fdt_fixup_gpu_nodes_am625(void *blob, int has_gpu)
+static void fdt_fixup_gpu_wdt_nodes_am625(void *blob, int has_gpu)
 {
 	if (!has_gpu) {
 		fdt_del_node_path(blob, "/bus@f0000/gpu@fd00000");
@@ -112,8 +112,8 @@ static void fdt_fixup_thermal_cooling_device_cpus_am625(void *blob, int core_nr)
 
 int ft_system_setup(void *blob, struct bd_info *bd)
 {
-	fdt_fixup_cores_nodes_am625(blob, k3_get_core_nr());
-	fdt_fixup_gpu_nodes_am625(blob, k3_has_gpu());
+	fdt_fixup_cores_wdt_nodes_am625(blob, k3_get_core_nr());
+	fdt_fixup_gpu_wdt_nodes_am625(blob, k3_has_gpu());
 	fdt_fixup_pru_node_am625(blob, k3_has_pru());
 	fdt_fixup_thermal_zone_nodes_am625(blob, k3_get_max_temp());
 	fdt_fixup_thermal_cooling_device_cpus_am625(blob, k3_get_core_nr());
