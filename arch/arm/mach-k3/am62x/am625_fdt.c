@@ -110,6 +110,26 @@ static void fdt_fixup_thermal_cooling_device_cpus_am625(void *blob, int core_nr)
 	}
 }
 
+static void fdt_fixup_cpu_freq_nodes_am625(void *blob, int max_freq)
+{
+	if (max_freq >= 1250000000)
+		return;
+
+	if (max_freq <= 1000000000) {
+		fdt_del_node_path(blob, "/opp-table/opp-1250000000");
+		fdt_del_node_path(blob, "/opp-table/opp-1400000000");
+	}
+
+	if (max_freq <= 800000000)
+		fdt_del_node_path(blob, "/opp-table/opp-1000000000");
+
+	if (max_freq <= 300000000) {
+		fdt_del_node_path(blob, "/opp-table/opp-800000000");
+		fdt_del_node_path(blob, "/opp-table/opp-600000000");
+		fdt_del_node_path(blob, "/opp-table/opp-400000000");
+	}
+}
+
 int ft_system_setup(void *blob, struct bd_info *bd)
 {
 	fdt_fixup_cores_wdt_nodes_am625(blob, k3_get_core_nr());
@@ -117,6 +137,7 @@ int ft_system_setup(void *blob, struct bd_info *bd)
 	fdt_fixup_pru_node_am625(blob, k3_has_pru());
 	fdt_fixup_thermal_zone_nodes_am625(blob, k3_get_max_temp());
 	fdt_fixup_thermal_cooling_device_cpus_am625(blob, k3_get_core_nr());
+	fdt_fixup_cpu_freq_nodes_am625(blob, k3_get_a53_max_frequency());
 	fdt_fixup_reserved(blob, "tfa", CONFIG_K3_ATF_LOAD_ADDR, 0x80000);
 	fdt_fixup_reserved(blob, "optee", CONFIG_K3_OPTEE_LOAD_ADDR, 0x1800000);
 
