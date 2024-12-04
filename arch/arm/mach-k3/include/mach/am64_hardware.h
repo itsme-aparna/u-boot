@@ -18,6 +18,17 @@
 #define MCU_CTRL_MMR0_BASE				0x04500000
 #define CTRL_MMR0_BASE					0x43000000
 
+#define CTRLMMR_WKUP_JTAG_DEVICE_ID		(WKUP_CTRL_MMR0_BASE + 0x18)
+#define JTAG_DEV_CORE_NR_MASK			GENMASK(23, 22)
+#define JTAG_DEV_CORE_NR_SHIFT			22
+#define JTAG_DEV_FEATURES_MASK          GENMASK(17, 13)
+#define JTAG_DEV_FEATURES_SHIFT         13
+#define JTAG_DEV_ICSS_MASK              BIT(15)
+#define JTAG_DEV_ICSS_SHIFT             15
+
+#define JTAG_DEV_FEATURE_HAS_CAN_VAL1			0x5
+#define JTAG_DEV_FEATURE_HAS_CAN_VAL2			0x6
+
 #define CTRLMMR_MAIN_DEVSTAT				(CTRL_MMR0_BASE + 0x30)
 
 #define MAIN_DEVSTAT_PRIMARY_BOOTMODE_MASK		0x00000078
@@ -45,6 +56,30 @@
 
 /* Use Last 2K as Scratch pad */
 #define TI_SRAM_SCRATCH_BOARD_EEPROM_START		0x7019f800
+
+static inline int k3_get_core_nr(void)
+{
+	u32 dev_id = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
+
+	return (dev_id & JTAG_DEV_CORE_NR_MASK) >> JTAG_DEV_CORE_NR_SHIFT;
+}
+
+static inline int k3_has_canfd(void)
+{
+	u32 dev_id = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
+	u32 feature_mask = (dev_id & JTAG_DEV_FEATURES_MASK) >>
+				JTAG_DEV_FEATURES_SHIFT;
+
+	return (feature_mask == JTAG_DEV_FEATURE_HAS_CAN_VAL1) |
+				(feature_mask == JTAG_DEV_FEATURE_HAS_CAN_VAL2);
+}
+
+static inline int k3_has_icss(void)
+{
+	u32 dev_id = readl(CTRLMMR_WKUP_JTAG_DEVICE_ID);
+
+	return (dev_id & JTAG_DEV_ICSS_MASK) >> JTAG_DEV_ICSS_SHIFT;
+}
 
 #if defined(CONFIG_SYS_K3_SPL_ATF) && !defined(__ASSEMBLY__)
 
